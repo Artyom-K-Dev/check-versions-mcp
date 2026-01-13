@@ -1,59 +1,41 @@
 # Check Versions MCP Server
 
-A Model Context Protocol (MCP) server written in Rust that allows AI agents to query package version information from multiple package managers.
+A Model Context Protocol (MCP) server that checks available versions of packages across multiple package managers.
 
-## Supported Package Managers
+## Features
 
-*   **Cargo** (Crates.io)
-*   **Helm** (Artifact Hub)
-*   **Docker** (Docker Hub)
-*   **Terraform** (Terraform Registry - Providers & Modules)
-
-## Installation & Configuration
-
-### Prerequisites
-*   Rust toolchain installed.
-
-### Build
-```bash
-cargo build --release
-```
-
-### Configuration (Cursor)
-Add the server to your `.cursor/mcp.json` (project specific) or your global MCP settings.
-
-**Copy-pasteable entry:**
-
-```json
-{
-  "mcpServers": {
-    "check-versions-mcp": {
-      "command": "/workspaces/MachineLearning/check-versions-mcp/target/release/check-versions-mcp",
-      "args": []
-    }
-  }
-}
-```
+- **Cargo (Rust)**: Check versions of crates on crates.io
+- **Docker**: Check tags for images on Docker Hub
+- **Helm**: Check versions of charts in repositories
+- **Terraform**: Check provider and module versions on the Terraform Registry
 
 ## Usage
 
-The server exposes a single unified tool: `get_versions`.
+### Docker (Recommended)
 
-### Tool: `get_versions`
+```bash
+docker run -i --rm ghcr.io/artyom-k-dev/check-versions-mcp:latest
+```
 
-**Arguments:**
-*   `package_manager`: String. One of `"cargo"`, `"helm"`, `"docker"`, `"terraform"`.
-*   `package_name`: String. The identifier for the package.
+### Local Development
 
-## Development
+1. Install dependencies:
+   ```bash
+   cargo build --release
+   ```
 
-1.  **Clone the repository**.
-2.  **Run locally**:
-    ```bash
-    cargo run
-    ```
-    The server communicates over `stdio` using JSON-RPC 2.0.
+2. Run the server:
+   ```bash
+   cargo run --release
+   ```
 
-## License
+## Tools Available
 
-MIT
+- `get_versions`: Get versions for a package from various package managers.
+  - Arguments:
+    - `package_manager`: One of "cargo", "docker", "helm", "terraform"
+    - `package_name`: Name of the package/image/chart
+
+## Configuration
+
+No environment variables are required for this server.
