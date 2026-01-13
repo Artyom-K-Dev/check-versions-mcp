@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.92.0-bookworm AS chef
 WORKDIR /app
 
 FROM chef AS planner
@@ -14,7 +14,7 @@ COPY . .
 RUN cargo build --release --bin check-versions-mcp
 
 # We do not need the Rust toolchain to run the binary!
-FROM debian:bookworm-slim AS runtime
+FROM debian:bookworm-20260112-slim AS runtime
 WORKDIR /app
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends ca-certificates openssl \
