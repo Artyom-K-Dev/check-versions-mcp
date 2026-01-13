@@ -2,7 +2,7 @@ use rmcp::{tool, tool_router, handler::server::tool::{ToolRouter, Parameters}, E
 use schemars::JsonSchema;
 use rmcp::serde::Deserialize;
 use std::future::Future;
-use crate::providers::{cargo, helm, docker, terraform};
+use crate::providers::{cargo, helm, docker, terraform, npm};
 
 #[derive(Clone)]
 pub struct VersionsTool {
@@ -38,9 +38,10 @@ impl VersionsTool {
             "helm" => helm::fetch_versions(&self.client, &package_name).await,
             "docker" => docker::fetch_versions(&self.client, &package_name).await,
             "terraform" => terraform::fetch_versions(&self.client, &package_name).await,
+            "npm" => npm::fetch_versions(&self.client, &package_name).await,
             _ => return Err(ErrorData { 
                 code: ErrorCode::INVALID_PARAMS, 
-                message: format!("Unsupported package manager: {}. Valid values are: 'cargo', 'helm', 'docker', 'terraform'.", package_manager).into(), 
+                message: format!("Unsupported package manager: {}. Valid values are: 'cargo', 'helm', 'docker', 'terraform', 'npm'.", package_manager).into(), 
                 data: None 
             }),
         };

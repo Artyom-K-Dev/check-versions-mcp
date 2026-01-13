@@ -8,6 +8,7 @@ A Model Context Protocol (MCP) server that checks available versions of packages
 - **Docker**: Check tags for images on Docker Hub
 - **Helm**: Check versions of charts in repositories
 - **Terraform**: Check provider and module versions on the Terraform Registry
+- **NPM**: Check versions of packages on the NPM Registry
 
 ## Usage
 
@@ -53,7 +54,7 @@ docker run -i --rm ghcr.io/artyom-k-dev/check-versions-mcp:latest
 
 - `get_versions`: Get versions for a package from various package managers.
   - Arguments:
-    - `package_manager`: One of "cargo", "docker", "helm", "terraform"
+    - `package_manager`: One of "cargo", "docker", "helm", "terraform", "npm"
     - `package_name`: Name of the package/image/chart
 
 ## Configuration
