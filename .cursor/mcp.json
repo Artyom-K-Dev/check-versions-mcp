@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "versions-mcp": {
+      "command": "/workspaces/VersionsMCP/target/debug/versions-mcp",
+      "args": []
+    }
+  }
+}

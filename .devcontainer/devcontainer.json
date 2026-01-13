@@ -1,0 +1,7 @@
+{
+  "name": "Rust MCP Server",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": {}
+  }
+}
