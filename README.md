@@ -13,6 +13,26 @@ A Model Context Protocol (MCP) server that checks available versions of packages
 
 ### Docker (Recommended)
 
+Add this to your `mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "check-versions": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "ghcr.io/artyom-k-dev/check-versions-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
+Or run manually:
+
 ```bash
 docker run -i --rm ghcr.io/artyom-k-dev/check-versions-mcp:latest
 ```
