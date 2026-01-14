@@ -27,7 +27,7 @@ impl VersionsTool {
         }
     }
 
-    #[tool(description = "Get versions for a package from various package managers (cargo, helm, docker, terraform).")]
+    #[tool(description = "Get versions for a package from various package managers (cargo, helm, docker, terraform, npm).")]
     pub async fn get_versions(&self, params: Parameters<VersionsArgs>) -> Result<String, ErrorData> {
         let args = params.0;
         let package_name = args.package_name;
