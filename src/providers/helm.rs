@@ -34,13 +34,36 @@ pub async fn fetch_versions(client: &Client, package_name: &str) -> Result<Vec<S
          return Err(anyhow::anyhow!("Helm chart not found on Artifact Hub: {}", package_name));
     }
 
-    let body = resp.json::<ArtifactHubResponse>().await?;
-    
+    let text = resp.text().await?;
+    parse_json(&text)
+}
+
+fn parse_json(json: &str) -> Result<Vec<String>> {
+    let body: ArtifactHubResponse = serde_json::from_str(json)?;
     let versions = body.available_versions
         .into_iter()
         .map(|v| v.version)
         .collect();
-        
     Ok(versions)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_helm_versions() {
+        let json = r#"
+        {
+            "available_versions": [
+                { "version": "1.0.0" },
+                { "version": "0.9.0" }
+            ]
+        }
+        "#;
+        let versions = parse_json(json).unwrap();
+        assert_eq!(versions.len(), 2);
+        assert!(versions.contains(&"1.0.0".to_string()));
+    }
 }
 

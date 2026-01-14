@@ -14,6 +14,7 @@ pub struct VersionsTool {
 struct VersionsArgs {
     package_name: String,
     package_manager: String,
+    limit: Option<usize>,
 }
 
 #[tool_router]
@@ -32,6 +33,7 @@ impl VersionsTool {
         let args = params.0;
         let package_name = args.package_name;
         let package_manager = args.package_manager;
+        let limit = args.limit.unwrap_or(25);
 
         let result = match package_manager.as_str() {
             "cargo" => cargo::fetch_versions(&self.client, &package_name).await,
@@ -47,7 +49,16 @@ impl VersionsTool {
         };
 
         match result {
-            Ok(versions) => {
+            Ok(mut versions) => {
+                versions.sort_by(|a, b| {
+                    let pa = parse_version(a);
+                    let pb = parse_version(b);
+                    pb.cmp(&pa)
+                });
+
+                if versions.len() > limit {
+                    versions.truncate(limit);
+                }
                 let text = serde_json::to_string(&versions).unwrap_or_default();
                 Ok(text)
             },
@@ -60,4 +71,24 @@ impl VersionsTool {
             }
         }
     }
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum VersionComponent {
+    Numeric(u64),
+    String(String),
+}
+
+fn parse_version(v: &str) -> Vec<VersionComponent> {
+    let v_clean = v.strip_prefix('v').unwrap_or(v);
+    v_clean.split(|c: char| !c.is_alphanumeric())
+        .filter(|s| !s.is_empty())
+        .map(|part| {
+            if let Ok(n) = part.parse::<u64>() {
+                VersionComponent::Numeric(n)
+            } else {
+                VersionComponent::String(part.to_string())
+            }
+        })
+        .collect()
 }

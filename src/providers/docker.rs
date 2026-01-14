@@ -39,13 +39,37 @@ pub async fn fetch_versions(client: &Client, image_name: &str) -> Result<Vec<Str
          return Err(anyhow::anyhow!("Docker image not found: {}", full_image_name));
     }
 
-    let body = resp.json::<DockerHubTagsResponse>().await?;
-    
+    let text = resp.text().await?;
+    parse_json(&text)
+}
+
+fn parse_json(json: &str) -> Result<Vec<String>> {
+    let body: DockerHubTagsResponse = serde_json::from_str(json)?;
     let versions = body.results
         .into_iter()
         .map(|t| t.name)
         .collect();
-        
     Ok(versions)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_docker_tags() {
+        let json = r#"
+        {
+            "results": [
+                { "name": "latest" },
+                { "name": "1.0.0" },
+                { "name": "alpine" }
+            ]
+        }
+        "#;
+        let versions = parse_json(json).unwrap();
+        assert_eq!(versions.len(), 3);
+        assert!(versions.contains(&"latest".to_string()));
+    }
 }
 

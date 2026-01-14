@@ -51,7 +51,12 @@ async fn fetch_provider_versions(client: &Client, namespace: &str, name: &str) -
          return Err(anyhow::anyhow!("Terraform provider not found: {}/{}", namespace, name));
     }
 
-    let body = resp.json::<TerraformVersionsResponse>().await?;
+    let text = resp.text().await?;
+    parse_provider_json(&text)
+}
+
+fn parse_provider_json(json: &str) -> Result<Vec<String>> {
+    let body: TerraformVersionsResponse = serde_json::from_str(json)?;
     
     let mut versions: Vec<String> = body.versions
         .into_iter()
@@ -77,7 +82,12 @@ async fn fetch_module_versions(client: &Client, namespace: &str, name: &str, pro
          return Err(anyhow::anyhow!("Terraform module not found: {}/{}/{}", namespace, name, provider));
     }
 
-    let body = resp.json::<TerraformModuleVersionsResponse>().await?;
+    let text = resp.text().await?;
+    parse_module_json(&text)
+}
+
+fn parse_module_json(json: &str) -> Result<Vec<String>> {
+    let body: TerraformModuleVersionsResponse = serde_json::from_str(json)?;
     
     // Modules response structure is slightly different, usually contains a list of modules (though we requested one)
     // with a versions list in each.
@@ -93,5 +103,43 @@ async fn fetch_module_versions(client: &Client, namespace: &str, name: &str, pro
     all_versions.reverse();
     
     Ok(all_versions)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_terraform_provider() {
+        let json = r#"
+        {
+            "versions": [
+                { "version": "1.0.0" },
+                { "version": "1.0.1" }
+            ]
+        }
+        "#;
+        let versions = parse_provider_json(json).unwrap();
+        assert_eq!(versions.len(), 2);
+        assert!(versions.contains(&"1.0.0".to_string()));
+    }
+
+    #[test]
+    fn test_parse_terraform_module() {
+        let json = r#"
+        {
+            "modules": [
+                {
+                    "versions": [
+                        { "version": "1.0.0" }
+                    ]
+                }
+            ]
+        }
+        "#;
+        let versions = parse_module_json(json).unwrap();
+        assert_eq!(versions.len(), 1);
+        assert!(versions.contains(&"1.0.0".to_string()));
+    }
 }
 
