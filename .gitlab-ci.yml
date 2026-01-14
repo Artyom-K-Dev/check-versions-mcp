@@ -1,0 +1,22 @@
+stages:
+  - build
+
+build-and-push:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  tags:
+    - linux
+    - dind
+    - docker
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker buildx create --use
+  script:
+    - docker buildx build --platform linux/amd64,linux/arm64 -t $CI_REGISTRY_IMAGE:latest --push .
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
